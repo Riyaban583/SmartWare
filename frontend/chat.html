@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat with Gemini</title>
+    <!-- Add Google Fonts and Font Awesome for consistency -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+        body {
+            color: var(--text-color);
+            background: var(--light-bg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s;
+            position: relative;
+        }
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        .logo:hover::after {
+            width: 100%;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+        .nav-links a:hover::before {
+            transform: translateY(0);
+        }
+        .nav-links a i {
+            transition: transform 0.3s ease;
+        }
+        .nav-links a:hover i {
+            transform: translateY(-3px);
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+        .chat-container {
+            max-width: 1200px;
+            margin: 120px auto 20px auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .chat-header {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 25px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.7);
+        }
+        .message {
+            margin-bottom: 25px;
+            display: flex;
+            align-items: flex-start;
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        .message-content {
+            max-width: 70%;
+            padding: 15px 20px;
+            border-radius: 18px;
+            margin: 0 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            line-height: 1.5;
+        }
+        .user .message-content {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        .bot .message-content {
+            background: white;
+            color: var(--text-color);
+        }
+        .avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s;
+        }
+        .avatar:hover {
+            transform: scale(1.1);
+        }
+        .user .avatar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+        .bot .avatar {
+            background: linear-gradient(135deg, var(--success-color), #2d9144);
+            color: white;
+        }
+        .input-container {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid rgba(224, 224, 224, 0.5);
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        #message-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid rgba(37, 99, 235, 0.3);
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        #message-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+        #send-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+        #send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        #send-button:active {
+            transform: translateY(0);
+        }
+        .typing-indicator {
+            padding: 15px 20px;
+            background: white;
+            border-radius: 18px;
+            margin: 0 15px;
+            color: #666;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            .chat-container {
+                margin: 80px 0 0 0;
+                border-radius: 0;
+                height: 100vh;
+            }
+            .message-content {
+                max-width: 85%;
+            }
+            .nav-links {
+                display: none;
+            }
+            .menu-toggle {
+                display: block;
+            }
+        }
+        /* Custom scrollbar */
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+        .chat-messages::-webkit-scrollbar-track {
+            background: rgba(240, 242, 245, 0.5);
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.5);
+            border-radius: 4px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-warehouse"></i>
+                WarehouseHub
+            </a>
+            <div class="nav-links">
+                <a href="placement.html"><i class="fas fa-boxes"></i> Inventory</a>
+                <a href="retrieval.html"><i class="fas fa-truck-loading"></i> Retrieval</a>
+                <a href="rearange.html"><i class="fas fa-exchange-alt"></i> Operations</a>
+                <a href="waste.html"><i class="fas fa-trash"></i> Disposal</a>
+                <a href="return.html"><i class="fas fa-undo"></i> Returns</a>
+                <a href="logs.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="chat.html"><i class="fas fa-comments"></i>AI Help</a>
+            </div>
+            <div class="nav-right">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            Warry
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <div class="message bot">
+                <div class="avatar">AI</div>
+                <div class="message-content">
+                    Hello! I'm Warry. How can I help you today?
+                </div>
+            </div>
+        </div>
+        <div class="input-container">
+            <input type="text" id="message-input" placeholder="Type your message here..." autocomplete="off">
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatMessages = document.getElementById('chat-messages');
+
+        // Function to add a message to the chat
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = isUser ? 'You' : 'AI';
+
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            messageContent.textContent = message;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        // IMPORTANT
+        // Function to send message to backend
+        async function sendMessageToBackend(message) {
+            try {
+                const response = await fetch('http://localhost:3022/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error:', error);
+                return 'Sorry, I encountered an error processing your request.';
+            }
+        }
+
+        // Handle send button click
+        async function handleSend() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Clear input
+            messageInput.value = '';
+
+            // Add user message to chat
+            addMessage(message, true);
+
+            // Show typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.innerHTML = `
+                <div class="avatar">AI</div>
+                <div class="typing-indicator">Typing...</div>
+            `;
+            chatMessages.appendChild(typingDiv);
+
+            // Get response from backend
+            const response = await sendMessageToBackend(message);
+
+            // Remove typing indicator
+            chatMessages.removeChild(typingDiv);
+
+            // Add bot response
+            addMessage(response);
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', handleSend);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                handleSend();
+            }
+        });
+
+        // Focus input on load
+        messageInput.focus();
+    </script>
+</body>
+</html>

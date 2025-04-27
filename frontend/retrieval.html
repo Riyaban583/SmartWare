@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarehouseHub - Item Retrieval</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background: var(--light-bg);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .retrieval-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .retrieval-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .retrieval-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .retrieval-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .retrieval-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: var(--light-bg);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .primary-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .primary-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: var(--light-bg);
+            color: var(--text-color);
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .secondary-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .retrieval-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Add these styles for the results and notifications */
+        .retrieval-results {
+            margin-top: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .retrieval-results h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .item-card {
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .item-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .item-priority {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .priority-normal { background: var(--primary-color); color: white; }
+        .priority-urgent { background: var(--warning-color); color: white; }
+        .priority-express { background: var(--danger-color); color: white; }
+
+        .item-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .retrieve-btn {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .cancel-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-warehouse"></i>
+                WarehouseHub
+            </a>
+            <div class="nav-links">
+                <a href="placement.html"><i class="fas fa-boxes"></i> Inventory</a>
+                <a href="retrieval.html"><i class="fas fa-truck-loading"></i> Retrieval</a>
+                <a href="rearange.html"><i class="fas fa-exchange-alt"></i> Operations</a>
+                <a href="waste.html"><i class="fas fa-trash"></i> Disposal</a>
+                <a href="return.html"><i class="fas fa-undo"></i> Returns</a>
+                <a href="logs.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="chat.html"><i class="fas fa-comments"></i> AI Help</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-truck-loading"></i>
+            Item Retrieval
+        </h1>
+
+        <div class="retrieval-grid">
+            <div class="retrieval-card">
+                <h3><i class="fas fa-search"></i> Find Item</h3>
+                <div class="retrieval-form" id="retrievalForm">
+                    <div class="form-group">
+                        <label for="item-id">Item Name</label>
+                        <input type="text" id="item-id" placeholder="Enter item name">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <select id="location">
+                            <option value="">Select location</option>
+                            <option value="zone-a">Zone A</option>
+                            <option value="zone-b">Zone B</option>
+                            <option value="zone-c">Zone C</option>
+                            <option value="loading">Loading Bay</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority</label>
+                        <select id="priority">
+                            <option value="normal">Normal</option>
+                            <option value="urgent">Urgent</option>
+                            <option value="express">Express</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" id="locateBtn" class="primary-btn">
+                            <i class="fas fa-search"></i> Locate Item
+                        </button>
+                        <button type="button" id="clearBtn" class="secondary-btn">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="retrieval-card">
+                <h3><i class="fas fa-clipboard-list"></i> Retrieval Queue</h3>
+                <div class="form-group">
+                    <select id="queue-status">
+                        <option value="all">All Requests</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="queue-zone">
+                        <option value="all">All Zones</option>
+                        <option value="zone-a">Zone A</option>
+                        <option value="zone-b">Zone B</option>
+                        <option value="zone-c">Zone C</option>
+                        <option value="loading">Loading Bay</option>
+                    </select>
+                </div>
+                <button type="button" id="refreshQueueBtn" class="primary-btn">
+                    <i class="fas fa-sync"></i> Refresh Queue
+                </button>
+            </div>
+        </div>
+
+        <!-- Add results section -->
+        <div class="retrieval-results" id="retrieval-results">
+            <h3><i class="fas fa-box"></i> Located Items</h3>
+            <div id="items-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Retrieval queue
+        let retrievalQueue = [];
+        // Store retrieved items
+        let retrievedItems = [];
+
+        // Retrieve items from API
+        async function retrieveItems(itemName) {
+            try {
+                // Make API call to backend
+                const response = await fetch(`http://localhost:3022/api/items/search?name=${itemName}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch item');
+                }
+
+                const data = await response.json();
+                
+                // Check if the response is an array or single object
+                const items = Array.isArray(data) ? data : [data];
+                
+                if (items.length === 0) {
+                    showNotification('No items found', 'warning');
+                    return [];
+                }
+
+                // Format the response data
+                const formattedItems = items.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    location: item.location || 'Unknown',
+                    status: item.status || 'available',
+                    quantity: item.quantity || 1,
+                    priority: item.priority || document.getElementById('priority').value || 'normal'
+                }));
+
+                // Store retrieved items globally
+                retrievedItems = formattedItems;
+
+                // Show success notification
+                showNotification(`Found ${formattedItems.length} item(s)`, 'success');
+                
+                // Display the item details
+                displayResults(formattedItems);
+
+                return formattedItems;
+
+            } catch (err) {
+                showNotification(`Error: ${err.message}`, 'danger');
+                return [];
+            }
+        }
+
+        // Get DOM elements
+        const locateBtn = document.getElementById('locateBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const refreshQueueBtn = document.getElementById('refreshQueueBtn');
+        const itemIdInput = document.getElementById('item-id');
+        const locationSelect = document.getElementById('location');
+        const prioritySelect = document.getElementById('priority');
+
+        // Handle locate item button click
+        locateBtn.addEventListener('click', async function() {
+            const itemName = itemIdInput.value;
+            if (!itemName) {
+                showNotification('Please enter an item name', 'warning');
+                return;
+            }
+            await retrieveItems(itemName);
+        });
+
+        // Handle clear button click
+        clearBtn.addEventListener('click', function() {
+            itemIdInput.value = '';
+            locationSelect.value = '';
+            prioritySelect.value = 'normal';
+            const resultsSection = document.getElementById('retrieval-results');
+            if (resultsSection) {
+                resultsSection.style.display = 'none';
+            }
+        });
+
+        // Handle refresh queue button click
+        refreshQueueBtn.addEventListener('click', function() {
+            refreshQueue();
+        });
+
+        // Display search results
+        function displayResults(items) {
+            const resultsSection = document.getElementById('retrieval-results');
+            const container = document.getElementById('items-container');
+            
+            if (!resultsSection || !container) {
+                console.error('Results section or container not found');
+                return;
+            }
+            
+            resultsSection.style.display = 'block';
+            container.innerHTML = '';
+
+            if (items.length === 0) {
+                container.innerHTML = '<p>No items found matching your criteria.</p>';
+                return;
+            }
+
+            items.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                
+                // Use the item's priority or default to normal
+                const priority = item.priority || 'normal';
+                
+                itemCard.innerHTML = `
+                    <div class="item-header">
+                        <span class="item-title">${item.name}${item.id ? ` (${item.id})` : ''}</span>
+                        <span class="item-priority priority-${priority}">${priority.toUpperCase()}</span>
+                    </div>
+                    <div class="item-details">
+                        <div class="detail-group">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-value">${item.location.replace('-', ' ').toUpperCase()}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">Status</span>
+                            <span class="detail-value">${item.status.toUpperCase()}</span>
+                        </div>
+                        <div class="detail-group">
+                            <span class="detail-label">Quantity</span>
+                            <span class="detail-value">${item.quantity} units</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="initiateRetrieval('${item.id}')" class="action-btn retrieve-btn">
+                            <i class="fas fa-dolly"></i> Initiate Retrieval
+                        </button>
+                        <button onclick="cancelRetrieval('${item.id}')" class="action-btn cancel-btn">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+            });
+        }
+
+        // Initiate retrieval process
+        function initiateRetrieval(itemId) {
+            const item = retrievedItems.find(item => item.id === itemId);
+            if (item) {
+                item.status = 'in-progress';
+                retrievalQueue.push({
+                    itemId: item.id,
+                    name: item.name,
+                    location: item.location,
+                    status: 'pending',
+                    timestamp: new Date()
+                });
+                showNotification(`Retrieval initiated for ${item.name}`, 'success');
+                refreshQueue();
+            } else {
+                showNotification('Item not found in retrieved items', 'danger');
+            }
+        }
+
+        // Cancel retrieval process
+        function cancelRetrieval(itemId) {
+            const item = retrievedItems.find(item => item.id === itemId);
+            if (item) {
+                item.status = 'available';
+                retrievalQueue = retrievalQueue.filter(q => q.itemId !== itemId);
+                showNotification(`Retrieval cancelled for ${item.name}`, 'warning');
+                refreshQueue();
+            } else {
+                showNotification('Item not found in retrieved items', 'danger');
+            }
+        }
+
+        // Refresh the queue display
+        function refreshQueue() {
+            const status = document.getElementById('queue-status').value;
+            const zone = document.getElementById('queue-zone').value;
+
+            // Filter queue based on selection
+            const filteredQueue = retrievalQueue.filter(item => 
+                (status === 'all' || item.status === status) &&
+                (zone === 'all' || item.location === zone)
+            );
+
+            // Update queue display
+            showNotification(`Queue refreshed: ${filteredQueue.length} items in queue`, 'success');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

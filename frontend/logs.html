@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarehouseHub - Activity Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background: var(--light-bg);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        .logger-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: var(--light-bg);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .primary-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .primary-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: var(--light-bg);
+            color: var(--text-color);
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .secondary-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        .log-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .log-filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .log-filters input,
+        .log-filters select {
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            background: var(--light-bg);
+        }
+
+        .log-filters input:focus,
+        .log-filters select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+        }
+
+        th, td {
+            padding: 1.25rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        th {
+            background: var(--light-bg);
+            font-weight: 600;
+            color: var(--text-color);
+            position: sticky;
+            top: 0;
+        }
+
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 10px;
+        }
+
+        tr:hover {
+            background: var(--light-bg);
+        }
+
+        .stats-panel {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-box {
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            display: block;
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .log-filters {
+                flex-direction: column;
+            }
+
+            .log-filters input,
+            .log-filters select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-warehouse"></i>
+                WarehouseHub
+            </a>
+            <div class="nav-links">
+                <a href="placement.html"><i class="fas fa-boxes"></i> Inventory</a>
+                <a href="retrieval.html"><i class="fas fa-truck-loading"></i> Retrieval</a>
+                <a href="rearange.html"><i class="fas fa-exchange-alt"></i> Operations</a>
+                <a href="waste.html"><i class="fas fa-trash"></i> Disposal</a>
+                <a href="return.html"><i class="fas fa-undo"></i> Returns</a>
+                <a href="logs.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="chat.html"><i class="fas fa-comments"></i> AI Help</a>
+
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-chart-line"></i>
+            Warehouse Activity Analysis
+        </h1>
+        
+        <div class="main-content">
+            <div class="logger-panel">
+                <h2>Activity Logger</h2>
+                <div class="form-group">
+                    <label for="worker-id">Worker ID</label>
+                    <input type="text" id="astronaut-id" placeholder="Enter Worker ID">
+                </div>
+                
+                <div class="form-group">
+                    <label for="activity-type">Activity Type</label>
+                    <select id="activity-type">
+                        <option value="EVA">Loading/Unloading</option>
+                        <option value="MAINT">Maintenance</option>
+                        <option value="EXP">Inventory Check</option>
+                        <option value="REST">Break Period</option>
+                        <option value="EX">Equipment Operation</option>
+                        <option value="MEAL">Shift Change</option>
+                        <option value="COMM">Communication</option>
+                        <option value="EMER">Emergency Procedure</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <select id="location">
+                        <option value="1">Zone A</option>
+                        <option value="2">Zone B</option>
+                        <option value="3">Zone C</option>
+                        <option value="4">Loading Bay</option>
+                        <option value="5">External Area</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duration">Duration (minutes)</label>
+                    <input type="number" id="duration" min="1" max="480" value="60">
+                </div>
+                
+                <div class="button-group">
+                    <button id="start-activity" class="primary-btn">
+                        <i class="fas fa-play"></i> Start Activity
+                    </button>
+                    <button id="end-activity" class="secondary-btn">
+                        <i class="fas fa-stop"></i> End Activity
+                    </button>
+                </div>
+            </div>
+            
+            <div class="log-container">
+                <h2>Activity Log</h2>
+                <div class="log-filters">
+                    <input type="text" id="log-search" placeholder="Search logs...">
+                    <select id="filter-astronaut">
+                        <option value="">All Workers</option>
+                    </select>
+                    <select id="filter-activity">
+                        <option value="">All Activities</option>
+                    </select>
+                </div>
+                <div class="log-table-container">
+                    <table id="log-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Worker</th>
+                                <th>Activity</th>
+                                <th>Duration</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody id="log-entries">
+                            <!-- Log entries will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-panel">
+            <h2>Activity Statistics</h2>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <span class="stat-label">Total Loading Time</span>
+                    <span id="total-eva" class="stat-value">0 min</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Activities Today</span>
+                    <span id="activities-today" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Equipment Usage</span>
+                    <span id="power-usage" class="stat-value">Low</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/logs.js"></script>
+</body>
+</html>

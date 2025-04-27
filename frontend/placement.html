@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarehouseHub - Inventory Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background: var(--light-bg);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .inventory-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .inventory-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .inventory-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .inventory-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: var(--light-bg);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .primary-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+        }
+
+        .primary-btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn {
+            background: var(--light-bg);
+            color: var(--text-color);
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .secondary-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .inventory-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+
+        /* Add styles for inventory list */
+        .inventory-list {
+            margin-top: 2rem;
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .inventory-list h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .item-card {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-info h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .item-info p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .item-actions button {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .delete-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-warehouse"></i>
+                WarehouseHub
+            </a>
+            <div class="nav-links">
+                <a href="placement.html"><i class="fas fa-boxes"></i> Inventory</a>
+                <a href="retrieval.html"><i class="fas fa-truck-loading"></i> Retrieval</a>
+                <a href="rearange.html"><i class="fas fa-exchange-alt"></i> Operations</a>
+                <a href="waste.html"><i class="fas fa-trash"></i> Disposal</a>
+                <a href="return.html"><i class="fas fa-undo"></i> Returns</a>
+                <a href="logs.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="chat.html"><i class="fas fa-comments"></i> AI Help</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-boxes"></i>
+            Inventory Management
+        </h1>
+
+        <div class="inventory-grid">
+            <div class="inventory-card">
+                <h3><i class="fas fa-box"></i> Add New Item</h3>
+                <div class="inventory-form">
+                    <form id="addItemForm">
+                        <div class="form-group">
+                            <label for="item-name">Item Name</label>
+                            <input type="text" id="item-name" placeholder="Enter item name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-category">Category</label>
+                            <select id="item-category" required>
+                                <option value="">Select category</option>
+                                <option value="electronics">Electronics</option>
+                                <option value="clothing">Clothing</option>
+                                <option value="furniture">Furniture</option>
+                                <option value="food">Food & Beverages</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="item-quantity">Quantity</label>
+                            <input type="number" id="item-quantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="storage-location">Storage Location</label>
+                            <select id="storage-location" required>
+                                <option value="">Select location</option>
+                                <option value="zone-a">Zone A</option>
+                                <option value="zone-b">Zone B</option>
+                                <option value="zone-c">Zone C</option>
+                                <option value="loading">Loading Bay</option>
+                            </select>
+                        </div>
+                        <div class="button-group">
+                            <button type="submit" class="primary-btn">
+                                <i class="fas fa-plus"></i> Add Item
+                            </button>
+                            <button type="reset" class="secondary-btn">
+                                <i class="fas fa-times"></i> Clear Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="inventory-card">
+                <h3><i class="fas fa-search"></i> Quick Search</h3>
+                <div class="form-group">
+                    <input type="text" id="search-input" placeholder="Search items...">
+                </div>
+                <div class="form-group">
+                    <select id="search-category">
+                        <option value="">All Categories</option>
+                        <option value="electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="food">Food & Beverages</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button class="primary-btn" onclick="searchItems()">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Add a new section to display items -->
+        <div class="inventory-list">
+            <h3><i class="fas fa-list"></i> Inventory Items</h3>
+            <div id="items-container"></div>
+        </div>
+    </div>
+
+    <script>
+        let inventoryItems = [];
+
+        async function fetchInventoryItems() {
+            try {
+                const response = await axios.get("http://localhost:3022/api/items", {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                inventoryItems = response.data;
+                displayItems();
+            } catch (error) {
+                console.error("Error fetching inventory items:", error);
+            }
+        }
+
+        // Function to add new item
+        document.getElementById('addItemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const newItem = {
+                name: document.getElementById('item-name').value,
+                category: document.getElementById('item-category').value,
+                quantity: document.getElementById('item-quantity').value,
+                location: document.getElementById('storage-location').value
+            };
+
+            await insertItemFunction(newItem);
+            await fetchInventoryItems();
+            this.reset();
+        });
+
+        async function insertItemFunction(newItem) {
+            try {
+                await axios.post("http://localhost:3022/api/items", newItem, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+            } catch (error) {
+                console.error("Error inserting item:", error);
+            }
+        }
+
+        // Function to display items
+        function displayItems() {
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+
+            inventoryItems.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <p>Category: ${item.category}</p>
+                        <p>Quantity: ${item.quantity}</p>
+                        <p>Location: ${item.location}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editItem(${item.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" onclick="deleteItem(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+            });
+        }
+
+        // Function to delete item
+        function deleteItem(id) {
+            if (confirm('Are you sure you want to delete this item?')) {
+                inventoryItems = inventoryItems.filter(item => item.id !== id);
+                localStorage.setItem('inventoryItems', JSON.stringify(inventoryItems));
+                displayItems();
+            }
+        }
+
+        // Function to edit item
+        function editItem(id) {
+            const item = inventoryItems.find(item => item.id === id);
+            if (item) {
+                document.getElementById('item-name').value = item.name;
+                document.getElementById('item-category').value = item.category;
+                document.getElementById('item-quantity').value = item.quantity;
+                document.getElementById('storage-location').value = item.location;
+                
+                // Remove the old item
+                deleteItem(id);
+                
+                // Scroll to the form
+                document.querySelector('.inventory-form').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Function to search items
+        function searchItems() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const searchCategory = document.getElementById('search-category').value.toLowerCase();
+
+            const filteredItems = inventoryItems.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(searchTerm);
+                const matchesCategory = !searchCategory || item.category === searchCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+
+            filteredItems.forEach(item => {
+                const itemCard = document.createElement('div');
+                itemCard.className = 'item-card';
+                itemCard.innerHTML = `
+                    <div class="item-info">
+                        <h4>${item.name}</h4>
+                        <p>Category: ${item.category}</p>
+                        <p>Quantity: ${item.quantity}</p>
+                        <p>Location: ${item.location}</p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="edit-btn" onclick="editItem(${item.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" onclick="deleteItem(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemCard);
+            });
+        }
+
+        // Display items on page load
+        fetchInventoryItems();
+    </script>
+</body>
+</html>
