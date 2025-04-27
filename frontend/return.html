@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarehouseHub - Item Retrieval</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background: var(--light-bg);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 6rem auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .section-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .primary-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .secondary-btn {
+            background: #e5e7eb;
+            color: var(--text-color);
+        }
+
+        .secondary-btn:hover {
+            background: #d1d5db;
+        }
+
+        .accent-btn {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .accent-btn:hover {
+            background: #0d9b6c;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--light-bg);
+            color: var(--text-color);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .cargo-list {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .cargo-item {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+
+        .cargo-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .item-info h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-info p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .space-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box h4 {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box p {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .chart-container {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            height: 200px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            max-width: 600px;
+            margin: 2rem auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .close-btn:hover {
+            color: var(--text-color);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .space-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-warehouse"></i>
+                WarehouseHub
+            </a>
+            <div class="nav-links">
+                <a href="placement.html"><i class="fas fa-boxes"></i> Inventory</a>
+                <a href="retrieval.html"><i class="fas fa-truck-loading"></i> Retrieval</a>
+                <a href="rearange.html"><i class="fas fa-exchange-alt"></i> Operations</a>
+                <a href="waste.html"><i class="fas fa-trash"></i> Disposal</a>
+                <a href="return.html"><i class="fas fa-undo"></i> Returns</a>
+                <a href="logs.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="chat.html"><i class="fas fa-comments"></i> AI Help</a>
+
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">
+            <i class="fas fa-arrow-left"></i>
+            Item Return Planning
+        </h1>
+        <p class="page-subtitle">Pre-undock waste return and space reclamation planning</p>
+        
+        <div class="main-content">
+            <div class="cargo-section">
+                <div class="section-card">
+                    <h2 class="section-title">
+                        <i class="fas fa-box"></i>
+                        Return Items Management
+                    </h2>
+                    
+                    <div class="module-info">
+                        <h3 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Resupply Module Details
+                        </h3>
+                        <div class="form-group">
+                            <label for="module-name">Module Name/ID</label>
+                            <input type="text" id="module-name" value="Progress MS-24">
+                        </div>
+                        <div class="form-group">
+                            <label for="undock-date">Planned Undock Date</label>
+                            <input type="date" id="undock-date" value="2025-04-15">
+                        </div>
+                        <div class="form-group">
+                            <label for="total-capacity">Total Return Capacity (cubic units)</label>
+                            <input type="number" id="total-capacity" value="45" min="1">
+                        </div>
+                        <button id="update-module-btn" class="btn primary-btn">
+                            <i class="fas fa-save"></i> Update Module Info
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-list"></i>
+                        Return Items Manifest
+                    </h3>
+                    <div class="filters">
+                        <button id="all-filter" class="filter-btn active">
+                            <i class="fas fa-th"></i> All Items
+                        </button>
+                        <button id="waste-filter" class="filter-btn">
+                            <i class="fas fa-trash"></i> Waste Items
+                        </button>
+                        <button id="science-filter" class="filter-btn">
+                            <i class="fas fa-flask"></i> Science Returns
+                        </button>
+                        <button id="equipment-filter" class="filter-btn">
+                            <i class="fas fa-tools"></i> Equipment
+                        </button>
+                    </div>
+                    
+                    <div class="cargo-list" id="cargo-items-container">
+                        <!-- Items will be populated here by JavaScript -->
+                    </div>
+                    
+                    <div class="add-item-form">
+                        <h3 class="section-title">
+                            <i class="fas fa-plus-circle"></i>
+                            Add Return Item
+                        </h3>
+                        <form id="add-cargo-form">
+                            <div class="form-group">
+                                <label for="item-name">Item Name</label>
+                                <input type="text" id="item-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="item-type">Item Type</label>
+                                <select id="item-type" required>
+                                    <option value="">-- Select Type --</option>
+                                    <option value="Waste">Waste</option>
+                                    <option value="Science">Science Return</option>
+                                    <option value="Equipment">Equipment</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="item-priority">Priority</label>
+                                <select id="item-priority" required>
+                                    <option value="High">High</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="item-volume">Volume (cubic units)</label>
+                                <input type="number" id="item-volume" min="0.1" step="0.1" required>
+                            </div>
+                            <button type="submit" class="btn primary-btn">
+                                <i class="fas fa-plus"></i> Add to Manifest
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="planning-section">
+                <div class="section-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Space Allocation
+                    </h3>
+                    <div id="space-gauge-container" class="gauge-container">
+                        <!-- Space gauge will be rendered here -->
+                    </div>
+                    <div class="space-stats">
+                        <div class="stat-box">
+                            <h4>Total Capacity</h4>
+                            <p id="total-capacity-display">45 cubic units</p>
+                        </div>
+                        <div class="stat-box">
+                            <h4>Allocated Space</h4>
+                            <p id="allocated-space">0 cubic units</p>
+                        </div>
+                        <div class="stat-box">
+                            <h4>Remaining Space</h4>
+                            <p id="remaining-space">45 cubic units</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Space Allocation by Type
+                    </h3>
+                    <div id="allocation-chart" class="chart-container">
+                        <!-- Pie chart will be rendered here -->
+                    </div>
+                </div>
+                
+                <div class="section-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Item Priority Breakdown
+                    </h3>
+                    <div id="priority-chart" class="chart-container">
+                        <!-- Priority breakdown chart will be rendered here -->
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="optimize-btn" class="btn primary-btn">
+                        <i class="fas fa-magic"></i> Optimize Warehouse Plan
+                    </button>
+                    <button id="export-btn" class="btn secondary-btn">
+                        <i class="fas fa-file-export"></i> Export Manifest
+                    </button>
+                    <button id="finalize-btn" class="btn accent-btn">
+                        <i class="fas fa-check-circle"></i> Finalize Return Plan
+                    </button>
+                </div>
+                
+                <div class="section-card">
+                    <h3 class="section-title">
+                        <i class="fas fa-undo"></i>
+                        Post-Undock Space Reclamation
+                    </h3>
+                    <p>After undocking, you will reclaim approximately <span id="reclaimed-space">0</span> cubic units of space.</p>
+                    <div id="reclamation-chart" class="chart-container">
+                        <!-- Space reclamation chart will be rendered here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="optimization-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2 class="section-title">
+                    <i class="fas fa-magic"></i>
+                    Warehouse Optimization Suggestions
+                </h2>
+                <div id="optimization-results"></div>
+                <button id="accept-optimization" class="btn primary-btn">
+                    <i class="fas fa-check"></i> Accept Optimization
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/return.js"></script>
+</body>
+</html>

@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WarehouseHub - Advanced Warehouse Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-color: #1f2937;
+            --light-bg: #f3f4f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background: var(--light-bg);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo:hover::after {
+            width: 100%;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(37, 99, 235, 0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .nav-links a:hover::before {
+            transform: translateY(0);
+        }
+
+        .nav-links a i {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-links a:hover i {
+            transform: translateY(-3px);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover;
+            opacity: 0.2;
+            z-index: 1;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            color: white;
+            padding: 0 2rem;
+            max-width: 800px;
+            transform-style: preserve-3d;
+        }
+
+        .head h2 {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateZ(50px);
+        }
+
+        .head p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateZ(30px);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            opacity: 0;
+        }
+
+        .learn-more-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            color: var(--primary-color);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .learn-more-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: transform 0.6s;
+            transform: skewX(-15deg);
+        }
+
+        .learn-more-btn:hover {
+            background: transparent;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .learn-more-btn:hover::before {
+            transform: translateX(200%) skewX(-15deg);
+        }
+
+        .secondary-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: transparent;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: 2px solid white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .secondary-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: transform 0.6s;
+            transform: skewX(-15deg);
+        }
+
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .secondary-btn:hover::before {
+            transform: translateX(200%) skewX(-15deg);
+        }
+
+        .company-description {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            max-width: 400px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            transform: translateY(100px);
+            opacity: 0;
+            transform-style: preserve-3d;
+        }
+
+        .company-description h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .company-description p {
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        .floating-warehouse {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            z-index: 5;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+
+        .warehouse-box {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotate 15s infinite linear;
+        }
+
+        .box-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .front {
+            transform: translateZ(75px);
+        }
+
+        .back {
+            transform: rotateY(180deg) translateZ(75px);
+        }
+
+        .left {
+            transform: rotateY(-90deg) translateZ(75px);
+        }
+
+        .right {
+            transform: rotateY(90deg) translateZ(75px);
+        }
+
+        .top {
+            transform: rotateX(90deg) translateZ(75px);
+        }
+
+        .bottom {
+            transform: rotateX(-90deg) translateZ(75px);
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotateY(0) rotateX(0);
+            }
+
+            100% {
+                transform: rotateY(360deg) rotateX(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .head h2 {
+                font-size: 2.5rem;
+            }
+
+            .company-description {
+                position: static;
+                margin: 2rem;
+                max-width: none;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .floating-warehouse {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-warehouse"></i>
+                WarehouseHub
+            </a>
+            <div class="nav-links">
+                <a href="placement.html"><i class="fas fa-boxes"></i> Inventory</a>
+                <a href="retrieval.html"><i class="fas fa-truck-loading"></i> Retrieval</a>
+                <a href="rearange.html"><i class="fas fa-exchange-alt"></i> Operations</a>
+                <a href="waste.html"><i class="fas fa-trash"></i> Disposal</a>
+                <a href="return.html"><i class="fas fa-undo"></i> Returns</a>
+                <a href="logs.html"><i class="fas fa-chart-line"></i> Analytics</a>
+                <a href="chat.html"><i class="fas fa-comments"></i> AI Help</a>
+            </div>
+            <div class="nav-right">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div id="canvas-container"></div>
+        <div class="floating-warehouse floating-warehouse-1">
+            <div class="warehouse-box">
+                <div class="box-face front"><i class="fas fa-boxes"></i></div>
+                <div class="box-face back"><i class="fas fa-truck-loading"></i></div>
+                <div class="box-face left"><i class="fas fa-exchange-alt"></i></div>
+                <div class="box-face right"><i class="fas fa-chart-line"></i></div>
+                <div class="box-face top"><i class="fas fa-warehouse"></i></div>
+                <div class="box-face bottom"><i class="fas fa-undo"></i></div>
+            </div>
+        </div>
+        <div class="floating-warehouse floating-warehouse-2">
+            <div class="warehouse-box">
+                <div class="box-face front"><i class="fas fa-boxes"></i></div>
+                <div class="box-face back"><i class="fas fa-truck-loading"></i></div>
+                <div class="box-face left"><i class="fas fa-exchange-alt"></i></div>
+                <div class="box-face right"><i class="fas fa-chart-line"></i></div>
+                <div class="box-face top"><i class="fas fa-warehouse"></i></div>
+                <div class="box-face bottom"><i class="fas fa-undo"></i></div>
+            </div>
+        </div>
+        <div class="hero-content">
+            <div class="head">
+                <h2>TRANSFORM YOUR<br>WAREHOUSE<br>MANAGEMENT</h2>
+                <p>Streamline your operations with our advanced warehouse management system. Optimize inventory, enhance
+                    efficiency, and reduce costs.</p>
+                <div class="cta-buttons">
+                    <a href="placement.html" class="learn-more-btn">
+                        <i class="fas fa-boxes"></i> Start Managing
+                    </a>
+                    <a href="logs.html" class="secondary-btn">
+                        <i class="fas fa-chart-line"></i> View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+    <script>
+        // ThreeJS Scene setup
+        let scene, camera, renderer;
+        let boxes = [];
+
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0);
+            document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+            // Camera position
+            camera.position.z = 10;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(0, 1, 1);
+            scene.add(directionalLight);
+
+            // Create multiple boxes to represent warehouse items
+            for (let i = 0; i < 100; i++) {
+                createBox();
+            }
+
+            // Position floating warehouses
+            const floatingWarehouse1 = document.querySelector('.floating-warehouse-1');
+            const floatingWarehouse2 = document.querySelector('.floating-warehouse-2');
+
+            if (floatingWarehouse1 && floatingWarehouse2) {
+                floatingWarehouse1.style.top = '20%';
+                floatingWarehouse1.style.left = '15%';
+
+                floatingWarehouse2.style.bottom = '25%';
+                floatingWarehouse2.style.right = '15%';
+            }
+
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+
+            // Start animation
+            animate();
+            startPageAnimations();
+        }
+
+        function createBox() {
+            const boxGeometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const boxMaterial = new THREE.MeshPhongMaterial({
+                color: new THREE.Color(
+                    Math.random() * 0.2 + 0.3,
+                    Math.random() * 0.2 + 0.3,
+                    Math.random() * 0.5 + 0.5
+                ),
+                transparent: true,
+                opacity: 0.7
+            });
+            const box = new THREE.Mesh(boxGeometry, boxMaterial);
+
+            // Position the box randomly in scene
+            box.position.x = (Math.random() - 0.5) * 30;
+            box.position.y = (Math.random() - 0.5) * 20;
+            box.position.z = (Math.random() - 0.5) * 10 - 5;
+
+            // Store random rotation speed
+            box.userData = {
+                rotationSpeed: {
+                    x: (Math.random() - 0.5) * 0.02,
+                    y: (Math.random() - 0.5) * 0.02,
+                    z: (Math.random() - 0.5) * 0.02
+                },
+                movementSpeed: {
+                    x: (Math.random() - 0.5) * 0.01,
+                    y: (Math.random() - 0.5) * 0.01
+                }
+            };
+
+            scene.add(box);
+            boxes.push(box);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotate each box
+            boxes.forEach(box => {
+                box.rotation.x += box.userData.rotationSpeed.x;
+                box.rotation.y += box.userData.rotationSpeed.y;
+                box.rotation.z += box.userData.rotationSpeed.z;
+
+                // Move box
+                box.position.x += box.userData.movementSpeed.x;
+                box.position.y += box.userData.movementSpeed.y;
+
+                // If box moves too far, reset position
+                if (Math.abs(box.position.x) > 15) {
+                    box.position.x = -Math.sign(box.position.x) * 15;
+                }
+                if (Math.abs(box.position.y) > 10) {
+                    box.position.y = -Math.sign(box.position.y) * 10;
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function startPageAnimations() {
+            // GSAP Animations for text and elements
+            const tl = gsap.timeline();
+
+            tl.to('.head h2', {
+                opacity: 1,
+                y: 0,
+                z: 0,
+                duration: 1,
+                ease: 'power3.out'
+            })
+                .to('.head p', {
+                    opacity: 1,
+                    y: 0,
+                    z: 0,
+                    duration: 1,
+                    ease: 'power3.out'
+                }, '-=0.5')
+                .to('.cta-buttons', {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: 'power3.out'
+                }, '-=0.5')
+                .to('.company-description', {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: 'power3.out'
+                }, '-=0.5');
+
+            // Navigation hover effect
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', (e) => {
+                    gsap.to(e.target.querySelector('i'), {
+                        y: -3,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+
+                link.addEventListener('mouseleave', (e) => {
+                    gsap.to(e.target.querySelector('i'), {
+                        y: 0,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            });
+
+            // Mouse movement parallax effect
+            document.addEventListener('mousemove', (e) => {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.005;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.005;
+
+                gsap.to('.hero-content', {
+                    rotationY: moveX,
+                    rotationX: -moveY,
+                    transformPerspective: 1000,
+                    duration: 1,
+                    ease: 'power2.out'
+                });
+
+                gsap.to('.company-description', {
+                    rotationY: moveX * 0.5,
+                    rotationX: -moveY * 0.5,
+                    transformPerspective: 1000,
+                    duration: 1,
+                    ease: 'power2.out'
+                });
+            });
+        }
+
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Mobile menu toggle
+        document.getElementById('menuToggle').addEventListener('click', function () {
+            const navLinks = document.querySelector('.nav-links');
+            if (navLinks.style.display === 'flex') {
+                gsap.to(navLinks, {
+                    opacity: 0,
+                    duration: 0.3,
+                    onComplete: () => {
+                        navLinks.style.display = 'none';
+                    }
+                });
+            } else {
+                navLinks.style.display = 'flex';
+                navLinks.style.opacity = 0;
+                navLinks.style.flexDirection = 'column';
+                navLinks.style.position = 'absolute';
+                navLinks.style.top = '100%';
+                navLinks.style.left = 0;
+                navLinks.style.width = '100%';
+                navLinks.style.background = 'rgba(255, 255, 255, 0.95)';
+                navLinks.style.backdropFilter = 'blur(10px)';
+                navLinks.style.padding = '1rem';
+
+                gsap.to(navLinks, {
+                    opacity: 1,
+                    duration: 0.3
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
